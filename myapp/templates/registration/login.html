@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% load custom_filters %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <!-- LOGO -->
+        <div class="text-center mb-6">
+            <img src="{% static 'images/SMAPAlogo.png' %}" alt="Logo" class="mx-auto w-32 h-auto">
+        </div>
+        
+        
+        
+        <!-- FORMULARIO -->
+        <h2 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Usuario</label>
+                {{ form.username|add_class:"input-field" }}
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+                {{ form.password|add_class:"input-field" }}
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                Ingresar
+            </button>
+        </form>
+    </div>
+</body>
+</html>
