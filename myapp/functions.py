@@ -52,7 +52,7 @@ def crear_boton(df, columna, es_verde, columna_caudal):
             width=300,
         )
         
-        return fig.to_html(full_html=False)
+        return fig.to_html(full_html=False, config={'displayModeBar': False})
     except Exception as e:
         print(f"Error al crear el gráfico: {e}")
         print(traceback.format_exc())
