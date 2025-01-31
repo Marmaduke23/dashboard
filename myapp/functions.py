@@ -4,21 +4,56 @@ from io import BytesIO
 import plotly.graph_objs as go
 import traceback
 
-# Función para descargar y cargar los datos
-def cargar_datos(onedrive_url):
+from datetime import datetime
+import threading
+
+# URL del archivo en OneDrive
+ONEDRIVE_URL = "https://immaipu-my.sharepoint.com/personal/karen_arancibia_maipu_cl/_layouts/15/download.aspx?share=Ec0mjRB4LrtCowyUYI11QVEBQ-XnXwoR48kodbA5qBUprg"
+
+# Caché de datos global
+df_cache = None
+ultima_actualizacion = None
+
+def descargar_datos():
+    """Descarga y carga los datos en un DataFrame global."""
+    global df_cache, ultima_actualizacion
     try:
-        response = requests.get(onedrive_url)
-        response.raise_for_status()  # Verifica errores en la descarga
-        df = pd.read_excel(BytesIO(response.content))
-        df['Dif registro'] = pd.to_datetime(df['Dif registro'], dayfirst=True, format='mixed')
+        inicio = datetime.now()
+
+        response = requests.get(ONEDRIVE_URL, stream=True, timeout=10)
+        response.raise_for_status()
+
+        # Cargar solo columnas necesarias con tipos optimizados
+        df = pd.read_excel(BytesIO(response.content),                           
+                            # Ajustar según sea necesario
+                           engine="openpyxl")
         
-        return df
+        df["Dif registro"] = pd.to_datetime(df["Dif registro"], dayfirst=True, errors="coerce")
+
+        df_cache = df
+        ultima_actualizacion = datetime.now()
+        
+        print(f"📥 Archivo actualizado en {ultima_actualizacion}, tomó {ultima_actualizacion - inicio} segundos")
+
     except requests.exceptions.RequestException as e:
-        print(f"Error al descargar el archivo: {e}")
-        return None
+        print(f"⚠️ Error al descargar el archivo: {e}")
     except Exception as e:
-        print(f"Error al procesar el archivo: {e}")
-        return None
+        print(f"⚠️ Error al procesar el archivo: {e}")
+
+def cargar_datos():
+    """Devuelve el DataFrame en caché, o lo descarga si no existe."""
+    if df_cache is None:
+        descargar_datos()
+    return df_cache
+
+def actualizar_cada_x_segundos(intervalo=5):
+    """Descarga automáticamente los datos cada cierto tiempo (en segundos)."""
+    descargar_datos()
+    threading.Timer(intervalo, actualizar_cada_x_segundos, [intervalo]).start()
+    print("descargado")
+
+# Llamar esta función al iniciar la app en Django
+actualizar_cada_x_segundos()
 
 # Función para crear el gráfico del botón
 def crear_boton(df, columna, es_verde, columna_caudal):
