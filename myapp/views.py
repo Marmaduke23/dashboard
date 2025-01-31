@@ -11,7 +11,7 @@ def home(request):
     return render(request, 'home.html')  # Respuesta para la ruta '/'
 
 def about(request):
-    return HttpResponse("¡Esta es la página 'Acerca de'!")  # Respuesta para la ruta '/about'
+    return render(request, 'about.html')   # Respuesta para la ruta '/about'
 
 from django.http import JsonResponse
 import random
