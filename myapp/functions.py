@@ -49,7 +49,9 @@ def cargar_datos():
 def actualizar_cada_x_segundos(intervalo=60*10):
     """Descarga automáticamente los datos cada cierto tiempo (en segundos)."""
     descargar_datos()
-    threading.Timer(intervalo, actualizar_cada_x_segundos, [intervalo]).start()
+    t=threading.Timer(intervalo, actualizar_cada_x_segundos, [intervalo])
+    t.daemon=True
+    t.start()
     print("descargado")
 
 # Llamar esta función al iniciar la app en Django
