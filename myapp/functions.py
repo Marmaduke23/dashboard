@@ -46,7 +46,7 @@ def cargar_datos():
         descargar_datos()
     return df_cache
 
-def actualizar_cada_x_segundos(intervalo=5):
+def actualizar_cada_x_segundos(intervalo=60*10):
     """Descarga automáticamente los datos cada cierto tiempo (en segundos)."""
     descargar_datos()
     threading.Timer(intervalo, actualizar_cada_x_segundos, [intervalo]).start()
