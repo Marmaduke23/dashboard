@@ -3,10 +3,48 @@
 {% block title %}HOME{% endblock %}
 
 {% block content %}
-<body>
-    <h1>Home</h1>
-    <p>Info BDatos PCP</p>
-</body>
+<h1>Home</h1>
+<p>Info BDatos PCP</p>
+
+<h2>Últimos Valores por Punto</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Punto</th>
+            <th>Fecha</th>
+            <th>Valor</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-datos">
+        <!-- Los datos se llenarán aquí dinámicamente -->
+    </tbody>
+</table>
+
+<!-- Script para cargar y actualizar los datos -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function actualizarTabla() {
+        $.getJSON("/datos/", function(data) {
+            var tabla = $("#tabla-datos");
+            tabla.empty();  // Limpiar antes de actualizar
+
+            data.data.forEach(function(row) {
+                var nuevaFila = `<tr>
+                    <td>${row.punto}</td>
+                    <td>${row.fecha}</td>
+                    <td>${row.valor}</td>
+                </tr>`;
+                tabla.append(nuevaFila);
+            });
+        });
+    }
+
+    // Cargar los datos inicialmente
+    actualizarTabla();
+
+    // Actualizar cada 60 segundos
+    setInterval(actualizarTabla, 60000);
+</script>
 {% endblock %}
 
 

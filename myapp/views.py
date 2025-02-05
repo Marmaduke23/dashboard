@@ -5,6 +5,7 @@ from django.http import HttpResponse  # Importa HttpResponse para enviar texto c
 from django.http import JsonResponse
 from .functions import cargar_datos, crear_boton
 import json
+import pyodbc
 
 @login_required 
 def home(request):
@@ -51,3 +52,44 @@ def actualizar_dashboard(request):
         })
     else:
         return JsonResponse({'error': 'No se pudieron cargar los datos'}, status=500)
+
+def obtener_datos(request):
+    drivers = pyodbc.drivers()
+    #print(pyodbc.drivers())
+    # Definir la cadena de conexión (ajusta estos valores)
+    server = '172DPRESIONES\\MSSQL2014'  # Dirección del servidor
+    database = 'nombre_base_datos'      # Nombre de la base de datos
+    username = 'consultaPresiones'      # Tu usuario
+    password = 'conPres025'                    # Tu contraseña
+
+    # Conectar a SQL Server usando pyodbc
+    conn = pyodbc.connect('DRIVER={ODBC Driver 18 for SQL Server};'
+                        f'SERVER={server};'
+                        f'UID={username};'
+                        f'PWD={password};'
+                        f'TrustServerCertificate=yes;')
+
+
+    # Consulta SQL para obtener el último valor de cada punto
+    cursor.execute("""
+        SELECT t.punto, t.fecha, t.valor
+        FROM tblRegistro t
+        INNER JOIN (
+            SELECT punto, MAX(fecha) AS max_fecha
+            FROM tblRegistro
+            GROUP BY punto
+        ) sub ON t.punto = sub.punto AND t.fecha = sub.max_fecha
+        ORDER BY t.punto;
+    """)
+
+    # Convertir los datos a una lista de diccionarios
+    datos = [
+        {"punto": row[0], "fecha": row[1].strftime("%Y-%m-%d %H:%M:%S"), "valor": row[2]}
+        for row in cursor.fetchall()
+    ]
+
+    # Cerrar conexión
+    cursor.close()
+    conn.close()
+
+    return JsonResponse({"data": datos})
