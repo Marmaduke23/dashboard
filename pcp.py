@@ -18,7 +18,10 @@ cursor = conn.cursor()
 #tabla = tblRegistro
 #cursor.execute('SELECT * FROM INFORMATION_SCHEMA.TABLES;')
 
-cursor.execute("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblRegistro';")
+cursor.execute("""
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblRegistro';
+
+""")
 
 # Recupera los resultados
 columns = cursor.fetchall()

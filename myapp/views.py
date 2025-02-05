@@ -68,11 +68,13 @@ def obtener_datos(request):
                         f'UID={username};'
                         f'PWD={password};'
                         f'TrustServerCertificate=yes;')
+    
+    cursor=conn.cursor()
 
 
     # Consulta SQL para obtener el último valor de cada punto
     cursor.execute("""
-        SELECT t.punto, t.fecha, t.valor
+        SELECT t.punto, t.fecha, t.medida
         FROM tblRegistro t
         INNER JOIN (
             SELECT punto, MAX(fecha) AS max_fecha
@@ -84,12 +86,14 @@ def obtener_datos(request):
 
     # Convertir los datos a una lista de diccionarios
     datos = [
-        {"punto": row[0], "fecha": row[1].strftime("%Y-%m-%d %H:%M:%S"), "valor": row[2]}
+        {"punto": row[0], "fecha": row[1].strftime("%Y-%m-%d %H:%M:%S"), "medida": row[2]}
         for row in cursor.fetchall()
     ]
 
     # Cerrar conexión
+    
     cursor.close()
     conn.close()
+    print(datos)
 
     return JsonResponse({"data": datos})
