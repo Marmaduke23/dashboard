@@ -5,78 +5,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planta San Jose de Chuchunco</title>
+    <title>Planta San José de Chuchunco</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
-    <h1 style="text-align: center;">PLANTA SAN JOSE DE CHUCHUNCO</h1>
-    <h2>Funcionamiento de pozos</h2>
 
-    <!-- Contenedores para los gráficos -->
-    <div class="grafico-container">
-        <div id="graficoPozo1A" class="grafico-item"></div>
-        <div id="graficoPozo2A" class="grafico-item"></div>
-        <div id="graficoPozo3A" class="grafico-item"></div>
-        <div id="graficoPozo4A" class="grafico-item"></div>
-        <div id="graficoPozo5" class="grafico-item"></div>
+<body class="bg-gray-100">
+    <!-- Spinner de carga -->
+    <div id="spinner" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="animate-spin rounded-full border-t-4 border-blue-500 w-16 h-16"></div>
     </div>
-    
-    <style>
-        /* Contenedor que usa Flexbox */
-        .grafico-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 10px; /* Espaciado entre los gráficos */
-        }
-    
-        /* Cada gráfico se toma como un ítem dentro del contenedor */
-        .grafico-item {
-            width: 18%; /* Para que haya 5 gráficos por fila */
-            
-        }
-    
-        /* En pantallas más pequeñas (menos de 768px) */
-        @media (max-width: 768px) {
-            .grafico-item {
-                width: 48%; /* 2 gráficos por fila */
-            }
-        }
-    
-        /* En pantallas más pequeñas (menos de 480px) */
-        @media (max-width: 480px) {
-            .grafico-container {
-                flex-direction: column; /* Cambia la dirección a columna */
-            }
-    
-            .grafico-item {
-                width: 100%; /* Un gráfico por fila */
-            }
-        }
-    </style>
+
+    <h1 class="text-3xl font-bold text-center text-gray-700 my-6">
+        Planta San José de Chuchunco
+    </h1>
+
+<!-- Sección Funcionamiento de Pozos -->
+    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2 mt-8 mb-4">Funcionamiento de Pozos</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+            <div id="graficoPozo1A"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+            <div id="graficoPozo2A"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+            <div id="graficoPozo3A"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+            <div id="graficoPozo4A"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+            <div id="graficoPozo5"></div>
+        </div>
+    </div>
+    <!-- Sección Funcionamiento de Estanques -->
+    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2 mt-8 mb-4">Funcionamiento de Estanques</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full">
+            <!-- Gráfico Estanque 1 -->
+            <div id="graficoEstanque3000"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full">
+            <!-- Gráfico Estanque 2 -->
+            <div id="graficoEstanque6000"></div>
+        </div>
+    </div>
+
+
+    <!-- Sección Funcionamiento Booster -->
+    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2 mt-8 mb-4">Funcionamiento Booster</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
+            <div id="botonBooster1"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
+            <div id="botonBooster2"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
+            <div id="botonBooster3"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
+            <div id="botonBooster4"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
+            <div id="botonBooster5"></div>
+        </div>
+    </div>
 
     <script>
         function actualizarDashboard() {
+            // Mostrar el spinner mientras se realiza la solicitud
+            $('#spinner').removeClass('hidden');
             $.ajax({
                 url: "{% url 'actualizar_dashboard' %}",
                 method: "GET",
                 success: function(data) {
                     if (data.botonPozo1A) {
-                        // Incrustar el HTML del gráfico en los divs correspondientes
                         $('#graficoPozo1A').html(data.botonPozo1A);
                         $('#graficoPozo2A').html(data.botonPozo2A);
                         $('#graficoPozo3A').html(data.botonPozo3A);
                         $('#graficoPozo4A').html(data.botonPozo4A);
                         $('#graficoPozo5').html(data.botonPozo5);
+
+                        $('#botonBooster1').html(data.botonBooster1);
+                        $('#botonBooster2').html(data.botonBooster2);
+                        $('#botonBooster3').html(data.botonBooster3);
+                        $('#botonBooster4').html(data.botonBooster4);
+                        $('#botonBooster5').html(data.botonBooster5);
+
+                        $('#graficoEstanque3000').html(data.graficoEstanque3000);
+                        $('#graficoEstanque6000').html(data.graficoEstanque6000);                        
                     }
+                },
+                complete: function() {
+                    // Ocultar el spinner cuando se completa la solicitud
+                    $('#spinner').addClass('hidden');
                 }
             });
         }
 
-        // Actualiza el dashboard cada 30 minutos
-        setInterval(actualizarDashboard, 30 * 60 * 1000); // 30 minutos
-        actualizarDashboard();  // Inicializa la carga al cargar la página
+        setInterval(actualizarDashboard, 30 * 60 * 1000);
+        actualizarDashboard();
     </script>
 </body>
 

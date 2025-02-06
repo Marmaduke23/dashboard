@@ -62,11 +62,10 @@ def crear_boton(df, columna, es_verde, columna_caudal):
     try:
         if columna not in df.columns:
             raise ValueError(f"La columna '{columna}' no existe en el DataFrame.")
-        print(df[columna_caudal])
         ultimo_valor = df[columna].iloc[-1]
         color = 'green' if es_verde == ultimo_valor else ('#FFF302' if ultimo_valor == 'No (Detenido)' else 'red')
         ultimo_valor_caudal = df[columna_caudal].iloc[-1] if not columna_caudal==False else None
-        anotation_text = f"Caudal: {ultimo_valor_caudal} l/s " if not pd.isna(ultimo_valor_caudal) else "Sin información disponible"
+        anotation_text = f"Caudal: {ultimo_valor_caudal} l/s " if not pd.isna(ultimo_valor_caudal) else "Caudal: Sin información"
         
         fig = go.Figure(
             data=go.Scatter(
@@ -79,18 +78,92 @@ def crear_boton(df, columna, es_verde, columna_caudal):
         )
         
         fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(title=columna),
-            yaxis=dict(title='', visible=False),
-            showlegend=False,
-            annotations=[dict(x=ultimo_valor, y=-0.05, text=anotation_text, showarrow=False, font=dict(size=12, color="black"))],
-            height=400,
-            width=300,
-        )
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(title=columna,title_standoff=5),
+        yaxis=dict(title='', visible=False,range=[-1, 1]),
+        showlegend=False,
+        annotations=[dict(x=ultimo_valor, y=-0.5, text=anotation_text, showarrow=False, font=dict(size=12))],
+        autosize=True,  # Hace que el tamaño se ajuste automáticamente
+        margin=dict(l=20, r=20, t=20, b=20),  # Ajusta los márgenes para evitar recortes
+    )
         
         return fig.to_html(full_html=False, config={'displayModeBar': False})
     except Exception as e:
         print(f"Error al crear el gráfico: {e}")
         print(traceback.format_exc())
         return None
+
+
+import plotly.graph_objects as go
+import pandas as pd
+
+def generar_grafico_estanque(nivel_maximo, nivel_actual, estanque, unidad, rm=0, rb=0):
+    """
+    Genera un gráfico estilo "estanque" que muestra el nivel máximo y el nivel actual de agua.
+
+    Args:
+        nivel_maximo (float): Nivel máximo del estanque en metros.
+        nivel_actual (float): Nivel actual del estanque en metros.
+        estanque (string): Nombre del estanque.
+        unidad (string): Unidad de medida del nivel.
+        rm (int): Rango medio desde cual el proyecto es amarillo.
+        rb (int): Rango bajo desde cual el proyecto es rojo
+
+    Returns:
+        plotly.graph_objects.Figure: Gráfico del estanque.
+    """
+    color_agua = 'lightblue'
+    # Definir color agua
+    if nivel_actual <= rm and nivel_actual > rb:
+        color_agua = 'yellow'
+    elif nivel_actual < rb:
+        color_agua = 'red'
+
+    # Crear la figura
+    fig = go.Figure()
+
+    # Agregar la barra del contenedor del estanque (nivel máximo)
+    fig.add_trace(go.Bar(
+        x=["Estanque"],
+        y=[nivel_maximo],  # Altura máxima
+        marker=dict(
+            color='lightgrey',  # Fondo del estanque
+            line=dict(color='lightgrey', width=10)  # Bordes del estanque
+        ),
+        hoverinfo='none',  # Sin información al pasar el mouse
+        name="Capacidad Máxima",
+        width=0.7  # Aumentar el grosor de la barra
+    ))
+
+    # Agregar la barra del nivel actual (agua dentro del estanque)
+    fig.add_trace(go.Bar(
+        x=["Estanque"],
+        y=[nivel_actual],  # Nivel actual de agua
+        marker=dict(color=color_agua),  # Color del agua
+        hovertemplate=f"Nivel Actual: {nivel_actual:.2f} m",  # Mostrar el nivel actual en metros
+        name="Nivel Actual",
+        width=0.7  # Aumentar el grosor de la barra
+    ))
+
+    # Ajustar el diseño para que parezca un estanque
+    fig.update_layout(
+        title=f"Nivel del Estanque {estanque}",
+        barmode='overlay',  # Superponer barras
+        yaxis=dict(
+            title=f"Nivel [{unidad}]",
+            range=[0, nivel_maximo],  # Rango desde 0 hasta el máximo
+            showgrid=False,  # Sin líneas de la cuadrícula
+            ticksuffix=f" {unidad}"  # Sufijo para mostrar unidades en el eje
+        ),
+        xaxis=dict(
+            showticklabels=False  # Sin etiquetas en el eje X
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",  # Fondo transparente
+        height=500,  # Altura del gráfico
+        showlegend=False,  # Ocultar leyenda
+        margin=dict(t=60),  # Aumentar margen superior (espacio entre título y gráfico)
+    )
+
+    return fig.to_html(full_html=False, config={'displayModeBar': False})
+
