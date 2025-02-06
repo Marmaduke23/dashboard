@@ -1,24 +1,35 @@
 {% extends 'base.html' %}
 
-{% block title %}HOME{% endblock %}
+{% block title %}Dashboard - Home{% endblock %}
 
 {% block content %}
-<h1>Home</h1>
-<p>Info BDatos PCP</p>
+<!-- Sección de encabezado -->
+<div class="text-center py-8">
+    <h1 class="text-4xl font-bold text-gray-800">Puntos de control de Presión</h1>
+    <p class="mt-2 text-lg text-gray-600">Información actualizada en tiempo real de la planta</p>
+</div>
 
-<h2>Últimos Valores por Punto</h2>
-<table border="1">
-    <thead>
-        <tr>
-            <th>Punto</th>
-            <th>Fecha</th>
-            <th>Valor</th>
-        </tr>
-    </thead>
-    <tbody id="tabla-datos">
-        <!-- Los datos se llenarán aquí dinámicamente -->
-    </tbody>
-</table>
+<!-- Sección de tabla de datos -->
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Últimos Valores por Punto</h2>
+    <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+        <thead>
+            <tr class="bg-blue-600 text-white">
+                <th class="py-2 px-4">Punto</th>
+                <th class="py-2 px-4">Fecha</th>
+                <th class="py-2 px-4">Valor</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-datos">
+            <!-- Los datos se llenarán aquí dinámicamente -->
+        </tbody>
+    </table>
+
+    <!-- Mensaje de error si no se puede conectar a la base de datos -->
+    <div id="error-message" class="mt-4 text-red-500 hidden">
+        <p>No se pudo conectar a la base de datos. Por favor, inténtelo más tarde.</p>
+    </div>
+</div>
 
 <!-- Script para cargar y actualizar los datos -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -27,17 +38,22 @@
         $.getJSON("/datos/", function(data) {
             var tabla = $("#tabla-datos");
             tabla.empty();  // Limpiar antes de actualizar
+            $("#error-message").addClass("hidden");  // Ocultar mensaje de error
 
             data.data.forEach(function(row) {
                 var nuevaFila = `<tr>
-                    <td>${row.punto}</td>
-                    <td>${row.fecha}</td>
-                    <td>${row.valor}</td>
+                    <td class="py-2 px-4 border">${row.punto}</td>
+                    <td class="py-2 px-4 border">${row.fecha}</td>
+                    <td class="py-2 px-4 border">${row.valor}</td>
                 </tr>`;
                 tabla.append(nuevaFila);
             });
+        }).fail(function() {
+            // Mostrar mensaje de error si falla la conexión
+            $("#error-message").removeClass("hidden");
         });
     }
+
 
     // Cargar los datos inicialmente
     actualizarTabla();
@@ -45,7 +61,7 @@
     // Actualizar cada 60 segundos
     setInterval(actualizarTabla, 60000);
 </script>
-{% endblock %}
 
+{% endblock %}
 
 
