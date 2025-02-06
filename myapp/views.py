@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse  # Importa HttpResponse para enviar texto como respuesta
 from django.http import JsonResponse
-from .functions import cargar_datos, crear_boton
+from .functions import cargar_datos, crear_boton, generar_grafico_estanque
 import json
 import pyodbc
 
@@ -41,6 +41,13 @@ def actualizar_dashboard(request):
         boton_3a = crear_boton(df, 'Pozo 3A - Funcionamiento', 'Sí', 'Pozo 3A - Caudal l/s')
         boton_4a = crear_boton(df, 'Pozo 4A - Funcionamiento', 'Sí', 'Pozo 4A - Caudal l/s')
         boton_5 = crear_boton(df, 'Pozo 5 - Funcionamiento', 'Sí', 'Pozo 5 - Caudal l/s')
+        boton_booster1=crear_boton(df, 'Booster 1 - Funcionamiento', 'Sí', False)
+        boton_booster2=crear_boton(df, 'Booster 2 - Funcionamiento', 'Sí', False)
+        boton_booster3=crear_boton(df, 'Booster 3 - Funcionamiento', 'Sí', False)
+        boton_booster4=crear_boton(df, 'Booster 4 - Funcionamiento', 'Sí', False)
+        boton_booster5=crear_boton(df, 'Booster 5 - Funcionamiento', 'Sí', False)
+        graficoEstanque3000= generar_grafico_estanque(3000, df['Elevado 3000 m3 - Nivel de Estanque - m3'].iloc[-1],'elevado 3000','m3',1200,600)#cambiar volumen por altura
+        graficoEstanque6000= generar_grafico_estanque(9, df['Semi Enterrado 6000 m3 - Nivel de Estanque - m'].iloc[-1],'semi enterrado 6000','m',3.5,1.7)#cambiar volumen por altura
         print("tiempo_boton",time.time() - inicio_carga)
         
         return JsonResponse({
@@ -48,7 +55,15 @@ def actualizar_dashboard(request):
             'botonPozo2A': boton_2a,
             'botonPozo3A': boton_3a,
             'botonPozo4A': boton_4a,
-            'botonPozo5': boton_5
+            'botonPozo5': boton_5,
+            'botonBooster1': boton_booster1,
+            'botonBooster2': boton_booster2,
+            'botonBooster3': boton_booster3,
+            'botonBooster4': boton_booster4,
+            'botonBooster5': boton_booster5,
+            'graficoEstanque3000': graficoEstanque3000,
+            'graficoEstanque6000': graficoEstanque6000,
+
         })
     else:
         return JsonResponse({'error': 'No se pudieron cargar los datos'}, status=500)
