@@ -21,28 +21,28 @@
     </h1>
     <!-- Hipervínculos debajo del título -->
     <div class="text-center mb-8">
-        <a href="#" class="text-blue-500 hover:underline mr-6">Dashboard</a>
+        <a href="/dashboard" class="text-blue-500 hover:underline mr-6">Dashboard</a>
         <a href="#" class="text-blue-500 hover:underline mr-6">Reportes</a>
-        <a href="#" class="text-blue-500 hover:underline mr-8">Históricos</a>
+        <a href="/historicos" class="text-blue-500 hover:underline mr-8">Históricos</a>
         <a href="#" class="text-blue-500 hover:underline">Planos y documentos</a>
     </div>
 
 <!-- Sección Funcionamiento de Pozos -->
     <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2 mt-8 mb-4">Funcionamiento de Pozos</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
             <div id="graficoPozo1A"></div>
         </div>
-        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
             <div id="graficoPozo2A"></div>
         </div>
-        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
             <div id="graficoPozo3A"></div>
         </div>
-        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
             <div id="graficoPozo4A"></div>
         </div>
-        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-300">
             <div id="graficoPozo5"></div>
         </div>
     </div>
@@ -81,39 +81,41 @@
     </div>
 
     <script>
+        function actualizarGrafico(id, data) {
+            $('#' + id).html(data);
+        }
+
         function actualizarDashboard() {
-            // Mostrar el spinner mientras se realiza la solicitud
             $('#spinner').removeClass('hidden');
+            
             $.ajax({
                 url: "{% url 'actualizar_dashboard' %}",
                 method: "GET",
                 success: function(data) {
-                    if (data.botonPozo1A) {
-                        $('#graficoPozo1A').html(data.botonPozo1A);
-                        $('#graficoPozo2A').html(data.botonPozo2A);
-                        $('#graficoPozo3A').html(data.botonPozo3A);
-                        $('#graficoPozo4A').html(data.botonPozo4A);
-                        $('#graficoPozo5').html(data.botonPozo5);
+                    actualizarGrafico("graficoPozo1A", data.botonPozo1A);
+                    actualizarGrafico("graficoPozo2A", data.botonPozo2A);
+                    actualizarGrafico("graficoPozo3A", data.botonPozo3A);
+                    actualizarGrafico("graficoPozo4A", data.botonPozo4A);
+                    actualizarGrafico("graficoPozo5", data.botonPozo5);
 
-                        $('#botonBooster1').html(data.botonBooster1);
-                        $('#botonBooster2').html(data.botonBooster2);
-                        $('#botonBooster3').html(data.botonBooster3);
-                        $('#botonBooster4').html(data.botonBooster4);
-                        $('#botonBooster5').html(data.botonBooster5);
+                    actualizarGrafico("botonBooster1", data.botonBooster1);
+                    actualizarGrafico("botonBooster2", data.botonBooster2);
+                    actualizarGrafico("botonBooster3", data.botonBooster3);
+                    actualizarGrafico("botonBooster4", data.botonBooster4);
+                    actualizarGrafico("botonBooster5", data.botonBooster5);
 
-                        $('#graficoEstanque3000').html(data.graficoEstanque3000);
-                        $('#graficoEstanque6000').html(data.graficoEstanque6000);                        
-                    }
+                    actualizarGrafico("graficoEstanque3000", data.graficoEstanque3000);
+                    actualizarGrafico("graficoEstanque6000", data.graficoEstanque6000);
                 },
                 complete: function() {
-                    // Ocultar el spinner cuando se completa la solicitud
                     $('#spinner').addClass('hidden');
                 }
             });
         }
 
+
+        setTimeout(actualizarDashboard, 1000);  // Primera carga rápida después de 1s
         setInterval(actualizarDashboard, 30 * 60 * 1000);
-        actualizarDashboard();
     </script>
 </body>
 

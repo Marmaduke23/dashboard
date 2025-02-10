@@ -7,5 +7,6 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),  # Página con el gráfico
     path('api/actualizar_dashboard/', views.actualizar_dashboard, name='actualizar_dashboard'),
     path('datos/', views.obtener_datos, name='obtener_datos'),  # API para los datos de pcp
+    path('historicos/', views.historicos, name='historicos'),  # Página con el gráfico
    
 ]

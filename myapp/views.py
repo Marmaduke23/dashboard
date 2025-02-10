@@ -22,6 +22,11 @@ def dashboard(request):
     """Renderiza la página del dashboard."""
     return render(request, "dashboard.html")
 
+@login_required 
+def historicos(request):
+    """Renderiza la página de historicos"""
+    return render(request, "historicos.html")
+
 
 
 
