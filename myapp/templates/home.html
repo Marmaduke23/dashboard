@@ -9,6 +9,12 @@
     <p class="mt-2 text-lg text-gray-600">Información actualizada en tiempo real de la planta</p>
 </div>
 
+<!-- Sección de mapa interactivo -->
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Mapa de Puntos de Control</h2>
+    <div id="map" style="height: 800px;"></div>
+</div>
+
 <!-- Sección de tabla de datos -->
 <div class="container mx-auto px-4 py-8">
     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Últimos Valores por Punto</h2>
@@ -31,29 +37,130 @@
     </div>
 </div>
 
-<!-- Script para cargar y actualizar los datos -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+<!-- Script para cargar Leaflet.js -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function actualizarTabla() {
-        $.getJSON("/datos/", function(data) {
-            var tabla = $("#tabla-datos");
-            tabla.empty();  // Limpiar antes de actualizar
-            $("#error-message").addClass("hidden");  // Ocultar mensaje de error
+    // Crear el mapa
+    var mapa = L.map('map').setView([56.7, -71.7], 12);  // Lat, Long, zoom
 
-            data.data.forEach(function(row) {
-                var nuevaFila = `<tr>
-                    <td class="py-2 px-4 border">${row.punto}</td>
-                    <td class="py-2 px-4 border">${row.fecha}</td>
-                    <td class="py-2 px-4 border">${parseFloat(row.medida).toFixed(2)}</td>
-                </tr>`;
-                tabla.append(nuevaFila);
-            });
-        }).fail(function() {
-            // Mostrar mensaje de error si falla la conexión
-            $("#error-message").removeClass("hidden");
+    // Añadir capa de mapa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapa);
+
+    // Diccionario de coordenadas con los puntos
+    var coordenadas = [
+    {"punto": 1, "latitud": -33.56636428883051, "longitud": -70.77722848879107},
+    {"punto": 2, "latitud": -33.555932715718164, "longitud": -70.7922668194138},
+    {"punto": 3, "latitud": -33.54238696085289, "longitud": -70.77798695644427},
+    {"punto": 4, "latitud": -33.546959969125126, "longitud": -70.76452301947023},
+    {"punto": 5, "latitud": -33.5537149781903, "longitud": -70.7778028809205},
+    {"punto": 6, "latitud": -33.53772923890644, "longitud": -70.74649356838026},
+    {"punto": 7, "latitud": -33.506114719765414, "longitud": -70.70025883400503},
+    {"punto": 8, "latitud": -33.54296173345031, "longitud": -70.78671341114892},
+    {"punto": 9, "latitud": -33.53651153350325, "longitud": -70.77162749229588},
+    {"punto": 10, "latitud": -33.5230124512994, "longitud": -70.76127828495363},
+    {"punto": 11, "latitud": -33.535789080949506, "longitud": -70.79294592029407},
+    {"punto": 12, "latitud": -33.52455716968924, "longitud": -70.78676767741064},
+    {"punto": 13, "latitud": -33.521294610039725, "longitud": -70.76490205118787},
+    {"punto": 14, "latitud": -33.50870904568474, "longitud": -70.77938696844619},
+    {"punto": 15, "latitud": -33.50345802539942, "longitud": -70.75894785232364},
+    {"punto": 16, "latitud": -33.46009033131971, "longitud": -70.72093370673232},
+    {"punto": 17, "latitud": -33.49416524216741, "longitud": -70.75843514033154},
+    {"punto": 18, "latitud": -33.50184779554303, "longitud": -70.74363236047078},
+    {"punto": 19, "latitud": -33.48092255919185, "longitud": -70.6961872391789},
+    {"punto": 20, "latitud": -33.48531464110269, "longitud": -70.76790102019844},
+    {"punto": 21, "latitud": -33.48944908692523, "longitud": -70.7571334012151},
+    {"punto": 22, "latitud": -33.472139916404785, "longitud": -70.72579294865899},
+    {"punto": 23, "latitud": -33.46863849242185, "longitud": -70.73778133654169},
+    {"punto": 24, "latitud": -33.48486777655718, "longitud": -70.74849532225502},
+    {"punto": 25, "latitud": -33.470172494023494, "longitud": -70.6975246414819},
+    {"punto": 26, "latitud": -33.46958815642637, "longitud": -70.73270833167685},
+    {"punto": 27, "latitud": -33.49299083007778, "longitud": -70.71590721453606},
+    {"punto": 28, "latitud": -33.50028515214377, "longitud": -70.7126316237427},
+    {"punto": 29, "latitud": -33.50543161211291, "longitud": -70.72052872145252},
+    {"punto": 30, "latitud": -33.51963752878274, "longitud": -70.79869741900615},
+    {"punto": 31, "latitud": -33.50614046990579, "longitud": -70.78824052964777},
+    {"punto": 32, "latitud": -33.49069125155202, "longitud": -70.74185666142671},
+    {"punto": 33, "latitud": -33.515775859801224, "longitud": -70.72635939671164},
+    {"punto": 34, "latitud": -33.50852071313395, "longitud": -70.71840670576849},
+    {"punto": 35, "latitud": -33.52458086212764, "longitud": -70.72642444078716},
+    {"punto": 36, "latitud": -33.535942755550494, "longitud": -70.75969720278141},
+    {"punto": 37, "latitud": -33.52005517469883, "longitud": -70.78396496460037},
+    {"punto": 38, "latitud": -33.543859251600466, "longitud": -70.78233045598675},
+    {"punto": 39, "latitud": -33.52533457715754, "longitud": -70.75787645297082},
+    {"punto": 40, "latitud": -33.52284856621224, "longitud": -70.7257794231737},
+    {"punto": 41, "latitud": -33.48636787849843, "longitud": -70.72509536393956}
+    ];
+
+    
+    // Función para obtener el color usando una escala continua
+    function obtenerColor(valor) {
+    // Definir la escala de color continua (puedes cambiar d3.interpolateViridis por otro como d3.interpolateCool, etc.)
+    var escalaColor = d3.scaleSequential(d3.interpolateViridis)
+                        .domain([0, 60]); // Ajusta el dominio a los valores mínimo y máximo que esperas
+
+    // Retornar el color correspondiente al valor
+    return escalaColor(valor);
+}
+
+    // Crear un grupo de coordenadas para ajustar el zoom automáticamente
+    var bounds = L.latLngBounds(coordenadas.map(p => [p.latitud, p.longitud]));
+    var puntos = {};
+
+
+    // Ajustar el mapa para que muestre todos los puntos
+    mapa.fitBounds(bounds);
+
+    // Función para actualizar la tabla
+function actualizarTabla() {
+    $.getJSON("/datos/", function(data) {
+        var tabla = $("#tabla-datos");
+        tabla.empty();  // Limpiar antes de actualizar
+        $("#error-message").addClass("hidden");  // Ocultar mensaje de error
+
+        // Crear un diccionario para guardar los valores de medida
+        var medidas = {};
+
+        data.data.forEach(function(row) {
+            var nuevaFila = `<tr>
+                <td class="py-2 px-4 border">${row.punto}</td>
+                <td class="py-2 px-4 border">${row.fecha}</td>
+                <td class="py-2 px-4 border">${parseFloat(row.medida).toFixed(2)}</td>
+            </tr>`;
+            tabla.append(nuevaFila);
+
+            // Actualizar color de los puntos en el mapa según la medida
+            var color = obtenerColor(row.medida);
+
+            // Si el marcador ya existe, actualizamos su color
+            if (puntos[row.punto]) {
+                puntos[row.punto].setStyle({ color: color });
+                puntos[row.punto].setPopupContent("<b>Punto " + row.punto + "</b><br>Medida: " + row.medida);
+            } else {
+                // Si no existe, creamos un nuevo marcador con el color correspondiente
+                puntos[row.punto] = L.marker([coordenadas[row.punto-1].latitud, coordenadas[row.punto-1].longitud], {
+                    icon: L.divIcon({ 
+                        className: 'custom-marker',
+                        html: '<div style="background-color:' + color + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid black;"></div>'
+
+                    })
+                })
+                .addTo(mapa)
+                .bindPopup("<b>Punto " + row.punto + "</b><br>Medida: " + row.medida);
+            }
         });
-    }
-
+    }).fail(function() {
+        // Mostrar mensaje de error si falla la conexión
+        $("#error-message").removeClass("hidden");
+    });
+}
 
     // Cargar los datos inicialmente
     actualizarTabla();
@@ -63,5 +170,4 @@
 </script>
 
 {% endblock %}
-
 
