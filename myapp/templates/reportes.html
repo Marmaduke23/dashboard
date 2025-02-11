@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planta San José de Chuchunco</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Spinner de carga -->
+    <div id="spinner" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="animate-spin rounded-full border-t-4 border-blue-500 w-16 h-16"></div>
+    </div>
+
+    <h1 class="text-3xl font-bold text-center text-gray-700 my-6">
+        Planta San José de Chuchunco
+    </h1>
+    <!-- Hipervínculos debajo del título -->
+    <div class="text-center mb-8">
+        <a href="/dashboard" class="text-blue-500 hover:underline mr-6">Dashboard</a>
+        <a href="/reportes" class="text-blue-500 hover:underline mr-6">Reportes</a>
+        <a href="/historicos" class="text-blue-500 hover:underline mr-8">Históricos</a>
+        <a href="#" class="text-blue-500 hover:underline">Planos y documentos</a>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2 mt-8 mb-4">PR-018</h2>
+
+    <!-- Contenedor de selección de mes y año -->
+    <div class="flex items-center space-x-4 mb-6">
+        <!-- Selector de Mes -->
+        <label for="mes" class="text-gray-700 font-medium">Mes:</label>
+        <select id="mes" class="p-2 border border-gray-300 rounded">
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+        </select>
+
+        <!-- Selector de Año -->
+        <label for="anio" class="text-gray-700 font-medium">Año:</label>
+        <select id="anio" class="p-2 border border-gray-300 rounded">
+            {% for year in anios %}
+                <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Botón para generar PR-018 -->
+        <button id="generarPR18" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Generar PR-018
+        </button>
+    </div>
+
+   <!-- Script para manejar la solicitud AJAX -->
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script>
+       $(document).ready(function() {
+            $("#generarPR18").click(function() {  // <-- Asegúrate de que coincida con el HTML
+                var anio = $("#anio").val();  // <-- Asegúrate de usar el ID correcto
+                var mes = $("#mes").val();  // <-- Asegúrate de usar el ID correcto
+
+                if (!anio || !mes) {
+                    alert("Por favor, selecciona un año y un mes.");
+                    return;
+                }
+                
+                $.ajax({
+                    url: "{% url 'generar_pr18' %}",  // Reemplaza con tu URL en Django
+                    type: "POST",
+                    data: {
+                        "anio": anio,
+                        "mes": mes,
+                        "csrfmiddlewaretoken": "{{ csrf_token }}"
+                    },
+                    xhrFields: { responseType: 'blob' },  // Importante para archivos binarios
+                    success: function(response, status, xhr) {
+                        var filename = "PR_18_" + anio + "_" + mes + ".xlsx";
+
+                        // Crear un blob a partir de la respuesta
+                        var blob = new Blob([response], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+                        // Crear un enlace temporal para la descarga
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error en la descarga:", error);
+                        alert("Error al generar PR-18. Intenta nuevamente.");
+                    }
+                });
+            });
+        });
+
+   </script>
+</body>
+{% endblock %}

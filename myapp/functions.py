@@ -113,6 +113,7 @@ def generar_grafico_estanque(nivel_maximo, nivel_actual, estanque, unidad, rm=0,
     Returns:
         plotly.graph_objects.Figure: Gráfico del estanque.
     """
+    print(nivel_actual)
     color_agua = 'lightblue'
     # Definir color agua
     if nivel_actual <= rm and nivel_actual > rb:

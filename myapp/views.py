@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .functions import cargar_datos, crear_boton, generar_grafico_estanque
 import json
 import pyodbc
+from .pr18chuchunco import *
 
 @login_required 
 def home(request):
@@ -26,6 +27,13 @@ def dashboard(request):
 def historicos(request):
     """Renderiza la página de historicos"""
     return render(request, "historicos.html")
+
+@login_required 
+def reportes(request):
+    anios = list(range(2020, 2031))  # Lista de años
+    """Renderiza la página de reportes"""
+    return render(request, 'reportes.html', {'anios': anios})
+
 
 
 
@@ -117,3 +125,19 @@ def obtener_datos(request):
     print(datos)
 
     return JsonResponse({"data": datos})
+
+def generar_pr18(request):
+    anio=int(request.POST.get('anio'))
+    mes=int(request.POST.get('mes'))
+    df = cargar_datos()
+    lista_pozos=["Pozo 1A","Pozo 2A","Pozo 3A","Pozo 4A","Pozo 5"]
+    planta="San Jose de Chuchunco"
+    print(df.columns)
+    # Llamar a la función para generar el archivo Excel en memoria
+    output = llenar_excel(df, mes, anio, lista_pozos, planta)
+
+    # Devolver el archivo como respuesta de descarga    
+    response = HttpResponse(output, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response['Content-Disposition'] = f'attachment; filename=PR_18_{anio}_{mes}.xlsx'
+    return response
+
