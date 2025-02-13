@@ -167,6 +167,58 @@ function actualizarTabla() {
 
     // Actualizar cada 60 segundos
     setInterval(actualizarTabla, 60000);
+
+    function agregarLeyenda() {
+    var leyenda = L.control({ position: 'topright' });
+
+    leyenda.onAdd = function (mapa) {
+        var div = L.DomUtil.create('div', 'info legend');
+
+        // Crear escala de colores continua
+        var escalaColor = d3.scaleSequential(d3.interpolateViridis).domain([0, 60]);
+
+        // Crear un gradiente lineal de colores (de abajo hacia arriba)
+        var gradiente = 'linear-gradient(to top, ' +
+                        escalaColor(0) + ', ' + 
+                        escalaColor(15) + ', ' + 
+                        escalaColor(30) + ', ' + 
+                        escalaColor(45) + ', ' + 
+                        escalaColor(60) + ')';
+
+        // Definir los valores de los ticks
+        var ticks = [0, 15, 30, 45, 60];
+        
+        // Calcular la posición de cada tick dentro de la barra de gradiente
+        var tickPositions = ticks.map(t => (t / 60) * 100); // Normalizado en porcentaje
+
+        // Crear el contenedor de la leyenda con título centrado
+        div.innerHTML = `
+            <div style="background: white; padding: 10px; border: 2px solid black; 
+                        width: 80px; height: 350px; display: flex; 
+                        flex-direction: column; align-items: center; gap: 10px;">
+                <h5 style="margin: 0; font-size: 16px; text-align: center;">Presión [m]</h5>
+                <div style="background: ${gradiente}; width: 20px; height: 250px; border: 1px solid black;
+                            position: relative;">
+                    <!-- Los ticks se posicionan dentro de la barra -->
+                    ${ticks.map((t, i) => `
+                        <span style="position: absolute; left: -25px; top: ${tickPositions[i]}%; font-size: 14px;">
+                            ${t}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        return div;
+    };
+
+    leyenda.addTo(mapa);
+}
+
+
+// Llamar a la función para agregar la leyenda
+agregarLeyenda();
+
 </script>
 
 {% endblock %}
